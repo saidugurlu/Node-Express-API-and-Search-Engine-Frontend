@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import './App.css';
+import './App.scss';
 import axios from 'axios';
+import { Noun } from './components/Noun';
+import { Book } from './components/Book';
+import { TechPerson } from './components/TechPerson';
 
 const url = 'http://localhost:3009/all';
 const separator = '|';
-
 function App() {
     const [searchItems, setSearchItems] = useState([]);
     const [filteredSearchItems, setFilteredSearchItems] = useState([]);
-
     useEffect(() => {
         (async () => {
             const _siteData = (await axios.get(url)).data;
@@ -20,11 +21,23 @@ function App() {
                     item
                 });
             });
-
             _siteData.books.forEach((item) => {
                 _searchItems.push({
                     kind: 'book',
                     bulkSearch: item.title + separator + item.description,
+                    item
+                });
+            });
+
+            _siteData.techPersons.forEach((item) => {
+                _searchItems.push({
+                    kind: 'techPerson',
+                    bulkSearch:
+                        item.fullName +
+                        separator +
+                        item.quickInfo +
+                        separator +
+                        item.body,
                     item
                 });
             });
@@ -46,21 +59,30 @@ function App() {
     };
     return (
         <div className="App">
-            <div>Testing</div>
+            <h1>Search Info</h1>
             {Object.keys(searchItems).length === 0 ? (
                 <div>Loading...</div>
             ) : (
                 <>
                     <input
+                        className="searchBox"
                         type="text"
                         autoFocus
                         onChange={(e) => handleSearch(e)}
                     />
                     {filteredSearchItems.map((item, i) => {
                         return (
-                            <li key={i}>
-                                {item.kind} {item.item.singular} {item.item.title}
-                            </li>
+                            <>
+                                {item.kind === 'noun' && (
+                                    <Noun item={item.item} />
+                                )}
+                                {item.kind === 'book' && (
+                                    <Book item={item.item} />
+                                )}
+                                {item.kind === 'techPerson' && (
+                                    <TechPerson item={item.item} />
+                                )}
+                            </>
                         );
                     })}
                 </>
