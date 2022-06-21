@@ -1,27 +1,14 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
+
 const url = 'http://localhost:3009/all';
+const separator = '|';
 
 function App() {
     const [searchItems, setSearchItems] = useState([]);
     const [filteredSearchItems, setFilteredSearchItems] = useState([]);
 
-    // searchItems:
-    /*
-	[
-	{
-		kind: "noun",
-		bulkSearch: "Notiz",
-		item: {
-						"article": "die",
-						"singular": "Notiz",
-						"plural": "die Notizen"
-				},
-	},
-	...
-]
-	*/
     useEffect(() => {
         (async () => {
             const _siteData = (await axios.get(url)).data;
@@ -34,11 +21,18 @@ function App() {
                 });
             });
 
+            _siteData.books.forEach((item) => {
+                _searchItems.push({
+                    kind: 'book',
+                    bulkSearch: item.title + separator + item.description,
+                    item
+                });
+            });
+
             setSearchItems(_searchItems);
             setFilteredSearchItems([]);
         })();
     }, []);
-
     const handleSearch = (e) => {
         const searchText = e.target.value;
         if (searchText === '') {
@@ -50,7 +44,6 @@ function App() {
             setFilteredSearchItems(_filteredSearchItems);
         }
     };
-
     return (
         <div className="App">
             <div>Testing</div>
@@ -66,7 +59,7 @@ function App() {
                     {filteredSearchItems.map((item, i) => {
                         return (
                             <li key={i}>
-                                {item.kind} {item.item.singular}
+                                {item.kind} {item.item.singular} {item.item.title}
                             </li>
                         );
                     })}
